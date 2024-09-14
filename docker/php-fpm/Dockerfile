@@ -11,6 +11,27 @@ RUN apt update && \
 RUN apt-get install -y libxml2-dev libpq-dev && \
         docker-php-ext-install pdo pgsql pdo_pgsql
 
+#install  rabbitmq
+RUN apt-get update \
+    && apt-get install -y \
+        librabbitmq-dev \
+        libssh-dev \
+    && docker-php-ext-install \
+        bcmath \
+        sockets \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp
+
+#install  supervisor
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    supervisor
+
+COPY ./supervisord.conf /etc/supervisor
+COPY ./supervisor/* /etc/supervisor/conf.d
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/bin --filename=composer && chmod +x /usr/bin/composer

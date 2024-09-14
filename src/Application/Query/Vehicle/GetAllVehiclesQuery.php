@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Query\Vehicle;
 
 use App\Domain\Repository\VehicleRepositoryInterface;
+use App\UI\Http\Paginator\PaginatorInterface;
 
 readonly class GetAllVehiclesQuery
 {
@@ -13,9 +14,14 @@ readonly class GetAllVehiclesQuery
     ) {
     }
 
-    public function getAll(): array
+    public function getAll(PaginatorInterface $paginator): array
     {
-        return $this->vehicleRepository->findAllArray();
+        return $this->vehicleRepository->findAllArray( $paginator);
+    }
+
+    public function getTotal(PaginatorInterface $paginator): int
+    {
+        return $this->vehicleRepository->getTotal( $paginator);
     }
 }
 

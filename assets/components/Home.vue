@@ -187,10 +187,10 @@ export default {
   methods: {
     initialize () {
       axios.get('/api/vehicles')
-          .then(response => this.desserts = response.data)
+          .then(response => this.desserts = response.data.data)
           .catch(error => this.error ='problem with downloading data');
       axios.get('/api/models')
-          .then(response => this.models = response.data)
+          .then(response => {this.models = response.data.data; })
           .catch(error => this.error ='problem with downloading data');
     },
 

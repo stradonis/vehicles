@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Query\Vehicle;
 
 use App\Domain\Repository\ModelRepositoryInterface;
+use App\UI\Http\Paginator\PaginatorInterface;
 
 readonly class GetAllModelsQuery
 {
@@ -13,9 +14,14 @@ readonly class GetAllModelsQuery
     ) {
     }
 
-    public function getAll(): array
+    public function getAllModelWithBrand(PaginatorInterface $paginator): array
     {
-        return $this->modelRepository->getAllModelWithBrand();
+        return $this->modelRepository->getAllModelWithBrand($paginator);
+    }
+
+    public function getTotalModelWithBrand(PaginatorInterface $paginator): int
+    {
+        return $this->modelRepository->getTotalModelWithBrand($paginator);
     }
 }
 

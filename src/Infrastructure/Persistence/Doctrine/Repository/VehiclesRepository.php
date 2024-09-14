@@ -4,9 +4,11 @@ namespace App\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Domain\Entity\Vehicle\Vehicle;
 use App\Domain\Repository\VehicleRepositoryInterface;
+use App\UI\Http\Paginator\PaginatorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Exception;
 
 /**
  * @method Vehicle|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,7 +28,7 @@ class VehiclesRepository extends ServiceEntityRepository implements VehicleRepos
         return $this->find($id);
     }
 
-    public function findAllArray(): array
+    public function findAllArray(PaginatorInterface $paginator): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -36,11 +38,28 @@ class VehiclesRepository extends ServiceEntityRepository implements VehicleRepos
             FROM vehicle v
                 LEFT JOIN model m  ON m.id = v.model_id
                 LEFT JOIN brand b  ON b.id = m.brand_id
+            LIMIT :page OFFSET :offsetPage 
             ';
 
-        $resultSet = $conn->executeQuery($sql);
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue("page", $paginator->getItemsPerPage());
+        $stmt->bindValue("offsetPage", $paginator->getOffset());
+        $resultSet = $stmt->executeQuery();
 
         return $resultSet->fetchAllAssociative();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTotal(PaginatorInterface $paginator): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT COUNT(*) FROM vehicle v';
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery();
+
+        return $paginator->getNumberOfPages((int)$resultSet->fetchOne());
     }
 
     public function save(Vehicle $vehicle, bool $flush = true): void
@@ -68,7 +87,7 @@ class VehiclesRepository extends ServiceEntityRepository implements VehicleRepos
             ->setParameter('val', strtoupper($value))
             ->getQuery()
             ->getOneOrNullResult()
-        ;
+            ;
     }
 
     /**

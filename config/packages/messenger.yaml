@@ -5,13 +5,22 @@ framework:
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+            #async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            notification:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: App\Infrastructure\Serializer\NotificationJsonMessageSerializer
+                options:
+                    exchange:
+                        name: notification
+                        default_publish_routing_key: notification
+                    queues:
+                        notification:
+                            binding_keys: [ notification ]
 
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
+            'App\Application\Command\Notification\NotificationCommand': notification
 
 # when@test:
 #    framework:

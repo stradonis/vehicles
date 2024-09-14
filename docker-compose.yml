@@ -57,5 +57,14 @@ services:
             - ./docker/pgdata:/var/lib/postgresql/data
         networks:
             - test_network
+    rabbit:
+        image: rabbitmq:3-management-alpine
+        ports:
+            - 5672:5672
+            - 15672:15672
+        networks:
+            - test_network
 networks:
+    rabbitmq_go_net:
+        driver: bridge
     test_network:
